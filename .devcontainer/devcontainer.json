@@ -48,5 +48,5 @@
 		// "--add-host=secretmanager.googleapis.com:142.251.132.42"
 	],
 	// Start Redis server when open the container, fix for test extension
-	// "postStartCommand": "/var/app/run.sh redis"
+	"postStartCommand": "sudo pip install -r requirements.txt && curl -sSf https://sh.rustup.rs | sh -s -- -y && bash -c 'source $HOME/.cargo/env'"
 }
