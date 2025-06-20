@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-use crate::opt::{Opt, BIG_INTEGER};
+use crate::opt::{Opt, BIG_INTEGER, NAN_AS_NULL};
 
 use crate::deserialize::pyobject::{
     get_unicode_key, parse_f64, parse_false, parse_i64, parse_none, parse_true, parse_u64, parse_big_int,
@@ -32,7 +32,9 @@ const TAG_STRING: u8 = 0b00000101;
 const TAG_TRUE: u8 = 0b00001011;
 const TAG_UINT64: u8 = 0b00000100;
 
+const YYJSON_READ_ALLOW_INF_AND_NAN: u32 = 1 << 4;
 const YYJSON_READ_BIGNUM_AS_RAW: u32 = 1 << 7;
+
 
 macro_rules! is_yyjson_tag {
     ($elem:expr, $tag:expr) => {
@@ -116,11 +118,13 @@ pub(crate) fn deserialize(
 
 fn read_doc_default(data: &'static str, err: &mut yyjson_read_err, opts: Opt) -> *mut yyjson_doc {
     unsafe {
-        let flag = if opt_enabled!(opts, BIG_INTEGER) {
-            YYJSON_READ_BIGNUM_AS_RAW
-        } else {
-            0 // no big integer support
-        };
+        let mut flag = 0;
+        if opt_enabled!(opts, BIG_INTEGER) {
+            flag |= YYJSON_READ_BIGNUM_AS_RAW
+        }
+        if opt_enabled!(opts, NAN_AS_NULL) {
+            flag |= YYJSON_READ_ALLOW_INF_AND_NAN;
+        }
         yyjson_read_opts(
             data.as_ptr() as *mut c_char,
             data.len(),
@@ -133,11 +137,13 @@ fn read_doc_default(data: &'static str, err: &mut yyjson_read_err, opts: Opt) ->
 
 fn read_doc_with_buffer(data: &'static str, err: &mut yyjson_read_err, opts: Opt) -> *mut yyjson_doc {
     unsafe {
-        let flag = if opt_enabled!(opts, BIG_INTEGER) {
-            YYJSON_READ_BIGNUM_AS_RAW
-        } else {
-            0 // no big integer support
-        };
+        let mut flag = 0;
+        if opt_enabled!(opts, BIG_INTEGER) {
+            flag |= YYJSON_READ_BIGNUM_AS_RAW
+        }
+        if opt_enabled!(opts, NAN_AS_NULL) {
+            flag |= YYJSON_READ_ALLOW_INF_AND_NAN;
+        }
         yyjson_read_opts(
             data.as_ptr() as *mut c_char,
             data.len(),

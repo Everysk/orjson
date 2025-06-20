@@ -3813,8 +3813,9 @@ static_inline bool read_inf(bool sign, u8 **ptr, u8 **pre, yyjson_val *val) {
             val->tag = ((u64)(cur - hdr) << YYJSON_TAG_BIT) | YYJSON_TYPE_RAW;
             val->uni.str = (const char *)hdr;
         } else {
-            val->tag = YYJSON_TYPE_NUM | YYJSON_SUBTYPE_REAL;
-            val->uni.u64 = f64_raw_get_inf(sign);
+            // val->tag = YYJSON_TYPE_NUM | YYJSON_SUBTYPE_REAL;
+            // val->uni.u64 = f64_raw_get_inf(sign);
+            val->tag = YYJSON_TYPE_NULL;
         }
         return true;
     }
@@ -3838,11 +3839,20 @@ static_inline bool read_nan(bool sign, u8 **ptr, u8 **pre, yyjson_val *val) {
             val->tag = ((u64)(cur - hdr) << YYJSON_TAG_BIT) | YYJSON_TYPE_RAW;
             val->uni.str = (const char *)hdr;
         } else {
-            val->tag = YYJSON_TYPE_NUM | YYJSON_SUBTYPE_REAL;
-            val->uni.u64 = f64_raw_get_nan(sign);
+            // val->tag = YYJSON_TYPE_NUM | YYJSON_SUBTYPE_REAL;
+            // val->uni.u64 = f64_raw_get_nan(sign);
+            val->tag = YYJSON_TYPE_NULL;
         }
         return true;
     }
+    return false;
+}
+
+/** Read 'Inf', 'Infinity' or 'NaN' literal (ignoring case). */
+static_inline bool read_inf_or_nan(bool sign, u8 **ptr, u8 **pre,
+                                   yyjson_val *val) {
+    if (read_inf(sign, ptr, pre, val)) return true;
+    if (read_nan(sign, ptr, pre, val)) return true;
     return false;
 }
 
@@ -3877,6 +3887,9 @@ static_noinline bool read_number_raw(u8 **ptr,
     
     /* read first digit, check leading zero */
     if (unlikely(!digi_is_digit(*cur))) {
+        if (has_read_flag(ALLOW_INF_AND_NAN)) {
+            if (read_inf_or_nan(*hdr == '-', &cur, pre, val)) return_raw();
+        }
         return_err(cur, "no digit after minus sign");
     }
     
@@ -3999,7 +4012,7 @@ static_noinline bool is_truncated_end(u8 *hdr, u8 *cur, u8 *end,
     if (code == YYJSON_READ_ERROR_UNEXPECTED_CHARACTER ||
         code == YYJSON_READ_ERROR_INVALID_NUMBER ||
         code == YYJSON_READ_ERROR_LITERAL) {
-        if (false) {
+        if (has_read_flag(ALLOW_INF_AND_NAN)) {
             if (*cur == '-') cur++;
             if (is_truncated_str(cur, end, "infinity", false) ||
                 is_truncated_str(cur, end, "nan", false)) {
@@ -4008,7 +4021,7 @@ static_noinline bool is_truncated_end(u8 *hdr, u8 *cur, u8 *end,
         }
     }
     if (code == YYJSON_READ_ERROR_UNEXPECTED_CONTENT) {
-        if (false) {
+        if (has_read_flag(ALLOW_INF_AND_NAN)) {
             if (hdr + 3 <= cur &&
                 is_truncated_str(cur - 3, end, "infinity", false)) {
                 return true; /* e.g. infin would be read as inf + in */
@@ -4394,6 +4407,7 @@ static_inline bool read_number(u8 **ptr,
     
 #define return_inf() do { \
     if (has_read_flag(BIGNUM_AS_RAW)) return_raw(); \
+    if (has_read_flag(ALLOW_INF_AND_NAN)) return_f64_bin(F64_RAW_INF); \
     else return_err(hdr, "number is infinity when parsed as double"); \
 } while (false)
     
@@ -4433,6 +4447,12 @@ static_inline bool read_number(u8 **ptr,
     /* begin with a leading zero or non-digit */
     if (unlikely(!digi_is_nonzero(*cur))) { /* 0 or non-digit char */
         if (unlikely(*cur != '0')) { /* non-digit char */
+            if (has_read_flag(ALLOW_INF_AND_NAN)) {
+                if (read_inf_or_nan(sign, &cur, pre, val)) {
+                    *end = cur;
+                    return true;
+                }
+            }
             return_err(cur, "no digit after minus sign");
         }
         /* begin with 0 */
@@ -4999,6 +5019,7 @@ static_inline bool read_number(u8 **ptr,
     
 #define return_inf() do { \
     if (has_read_flag(BIGNUM_AS_RAW)) return_raw(); \
+    if (has_read_flag(ALLOW_INF_AND_NAN)) return_f64_bin(F64_RAW_INF); \
     else return_err(hdr, "number is infinity when parsed as double"); \
 } while (false)
     
@@ -5028,6 +5049,12 @@ static_inline bool read_number(u8 **ptr,
     
     /* read first digit, check leading zero */
     if (unlikely(!digi_is_digit(*cur))) {
+        if (has_read_flag(ALLOW_INF_AND_NAN)) {
+            if (read_inf_or_nan(sign, &cur, pre, val)) {
+                *end = cur;
+                return true;
+            }
+        }
         return_err(cur, "no digit after minus sign");
     }
     if (*cur == '0') {
@@ -5712,10 +5739,13 @@ static_noinline yyjson_doc *read_root_single(u8 *hdr,
     }
     if (*cur == 'n') {
         if (likely(read_null(&cur, val))) goto doc_end;
-        if (false) {
+        if (has_read_flag(ALLOW_INF_AND_NAN)) {
             if (read_nan(false, &cur, pre, val)) goto doc_end;
         }
         goto fail_literal;
+    }
+    if (has_read_flag(ALLOW_INF_AND_NAN)) {
+        if (read_inf_or_nan(false, &cur, pre, val)) goto doc_end;
     }
     goto fail_character;
     
@@ -5757,8 +5787,8 @@ fail_garbage:
     return_err(cur, UNEXPECTED_CONTENT, "unexpected content after document");
 fail_recursion:
     return_err(cur, RECURSION_DEPTH, "array and object recursion depth exceeded");    
-
-    #undef return_err
+    
+#undef return_err
 }
 
 /** Read JSON document (accept all style, but optimized for minify). */
@@ -5903,6 +5933,9 @@ arr_val_begin:
         val_incr();
         ctn_len++;
         if (likely(read_null(&cur, val))) goto arr_val_end;
+        if (has_read_flag(ALLOW_INF_AND_NAN)) {
+            if (read_nan(false, &cur, pre, val)) goto arr_val_end;
+        }
         goto fail_literal;
     }
     if (*cur == ']') {
@@ -5914,6 +5947,13 @@ arr_val_begin:
     if (char_is_space(*cur)) {
         while (char_is_space(*++cur));
         goto arr_val_begin;
+    }
+    if (has_read_flag(ALLOW_INF_AND_NAN) &&
+        (*cur == 'i' || *cur == 'I' || *cur == 'N')) {
+        val_incr();
+        ctn_len++;
+        if (read_inf_or_nan(false, &cur, pre, val)) goto arr_val_end;
+        goto fail_character;
     }
     goto fail_character;
     
@@ -6047,11 +6087,21 @@ obj_val_begin:
         val++;
         ctn_len++;
         if (likely(read_null(&cur, val))) goto obj_val_end;
+        if (has_read_flag(ALLOW_INF_AND_NAN)) {
+            if (read_nan(false, &cur, pre, val)) goto obj_val_end;
+        }
         goto fail_literal;
     }
     if (char_is_space(*cur)) {
         while (char_is_space(*++cur));
         goto obj_val_begin;
+    }
+    if (has_read_flag(ALLOW_INF_AND_NAN) &&
+        (*cur == 'i' || *cur == 'I' || *cur == 'N')) {
+        val++;
+        ctn_len++;
+        if (read_inf_or_nan(false, &cur, pre, val)) goto obj_val_end;
+        goto fail_character;
     }
     goto fail_character;
     
@@ -6130,7 +6180,7 @@ fail_garbage:
     return_err(cur, UNEXPECTED_CONTENT, "unexpected content after document");
 fail_recursion:
     return_err(cur, RECURSION_DEPTH, "array and object recursion depth exceeded");
-
+    
 #undef val_incr
 #undef return_err
 }
@@ -6292,7 +6342,7 @@ arr_val_begin:
         val_incr();
         ctn_len++;
         if (likely(read_null(&cur, val))) goto arr_val_end;
-        if (false) {
+        if (has_read_flag(ALLOW_INF_AND_NAN)) {
             if (read_nan(false, &cur, pre, val)) goto arr_val_end;
         }
         goto fail_literal;
@@ -6306,6 +6356,13 @@ arr_val_begin:
     if (char_is_space(*cur)) {
         while (char_is_space(*++cur));
         goto arr_val_begin;
+    }
+    if (has_read_flag(ALLOW_INF_AND_NAN) &&
+        (*cur == 'i' || *cur == 'I' || *cur == 'N')) {
+        val_incr();
+        ctn_len++;
+        if (read_inf_or_nan(false, &cur, pre, val)) goto arr_val_end;
+        goto fail_character;
     }
     goto fail_character;
     
@@ -6456,11 +6513,21 @@ obj_val_begin:
         val++;
         ctn_len++;
         if (likely(read_null(&cur, val))) goto obj_val_end;
+        if (has_read_flag(ALLOW_INF_AND_NAN)) {
+            if (read_nan(false, &cur, pre, val)) goto obj_val_end;
+        }
         goto fail_literal;
     }
     if (char_is_space(*cur)) {
         while (char_is_space(*++cur));
         goto obj_val_begin;
+    }
+    if (has_read_flag(ALLOW_INF_AND_NAN) &&
+        (*cur == 'i' || *cur == 'I' || *cur == 'N')) {
+        val++;
+        ctn_len++;
+        if (read_inf_or_nan(false, &cur, pre, val)) goto obj_val_end;
+        goto fail_character;
     }
     goto fail_character;
     
@@ -6538,8 +6605,8 @@ fail_character:
 fail_garbage:
     return_err(cur, UNEXPECTED_CONTENT, "unexpected content after document");
 fail_recursion:
-    return_err(cur, RECURSION_DEPTH, "array and object recursion depth exceeded");
-    
+    return_err(cur, RECURSION_DEPTH, "array and object recursion depth exceeded");    
+
 #undef val_incr
 #undef return_err
 }
@@ -6624,8 +6691,8 @@ yyjson_doc *yyjson_read_file(const char *path,
 
     yyjson_doc *doc;
     FILE *file;
-    
 
+    
     if (unlikely(!path)) return_err(INVALID_PARAMETER, "input path is NULL");
     
     file = fopen_readonly(path);
@@ -6651,7 +6718,7 @@ yyjson_doc *yyjson_read_fp(FILE *file,
 } while (false)
     
 
-    yyjson_alc alc = alc_ptr ? *alc_ptr : YYJSON_DEFAULT_ALC;
+yyjson_alc alc = alc_ptr ? *alc_ptr : YYJSON_DEFAULT_ALC;
     yyjson_doc *doc;
     
     long file_size = 0, file_pos;
@@ -6748,7 +6815,7 @@ const char *yyjson_read_number(const char *dat,
     u8 *raw_end; /* raw end for null-terminator */
     u8 **pre; /* previous raw end pointer */
     const char *msg;
-
+    
     
 #if !YYJSON_HAS_IEEE_754 || YYJSON_DISABLE_FAST_FP_CONV
     u8 buf[128];
