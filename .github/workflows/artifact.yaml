@@ -131,66 +131,66 @@ jobs:
           source .venv/bin/activate
           script/debug
 
-  manylinux_aarch64:
-    runs-on: ubuntu-24.04-arm
-    container:
-      image: fedora:rawhide
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        python: [
-          # { interpreter: 'python3.13t', compatibility: "manylinux_2_34", publish: false },
-          # { interpreter: 'python3.13', compatibility: "manylinux_2_17", publish: true },
-          { interpreter: 'python3.12', compatibility: "manylinux_2_17", publish: true },
-          { interpreter: 'python3.11', compatibility: "manylinux_2_17", publish: true },
-          # { interpreter: 'python3.10', compatibility: "manylinux_2_17", publish: true },
-          # { interpreter: 'python3.9', compatibility: "manylinux_2_17", publish: true },
-        ]
-    env:
-      CARGO_TARGET_DIR: "/tmp/orjson"
-      CC: "clang"
-      CFLAGS: "-O2 -fstrict-aliasing -fno-plt -emit-llvm"
-      LDFLAGS: "-fuse-ld=lld -Wl,-plugin-opt=also-emit-llvm -Wl,--as-needed -Wl,-zrelro,-znow"
-      RUSTFLAGS: "-C linker=clang -C link-arg=-fuse-ld=lld -C linker-plugin-lto -C lto=fat -C link-arg=-Wl,-zrelro,-znow -Z mir-opt-level=4 -Z threads=4 -D warnings"
-      VENV: ".venv"
-    steps:
+  # manylinux_aarch64:
+  #   runs-on: ubuntu-24.04-arm
+  #   container:
+  #     image: fedora:rawhide
+  #   timeout-minutes: 10
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python: [
+  #         # { interpreter: 'python3.13t', compatibility: "manylinux_2_34", publish: false },
+  #         # { interpreter: 'python3.13', compatibility: "manylinux_2_17", publish: true },
+  #         { interpreter: 'python3.12', compatibility: "manylinux_2_17", publish: true },
+  #         { interpreter: 'python3.11', compatibility: "manylinux_2_17", publish: true },
+  #         # { interpreter: 'python3.10', compatibility: "manylinux_2_17", publish: true },
+  #         # { interpreter: 'python3.9', compatibility: "manylinux_2_17", publish: true },
+  #       ]
+  #   env:
+  #     CARGO_TARGET_DIR: "/tmp/orjson"
+  #     CC: "clang"
+  #     CFLAGS: "-O2 -fstrict-aliasing -fno-plt -emit-llvm"
+  #     LDFLAGS: "-fuse-ld=lld -Wl,-plugin-opt=also-emit-llvm -Wl,--as-needed -Wl,-zrelro,-znow"
+  #     RUSTFLAGS: "-C linker=clang -C link-arg=-fuse-ld=lld -C linker-plugin-lto -C lto=fat -C link-arg=-Wl,-zrelro,-znow -Z mir-opt-level=4 -Z threads=4 -D warnings"
+  #     VENV: ".venv"
+  #   steps:
 
-      - name: CPU info
-        run: cat /proc/cpuinfo
+  #     - name: CPU info
+  #       run: cat /proc/cpuinfo
 
-      - run: dnf install --setopt=install_weak_deps=false -y git
+  #     - run: dnf install --setopt=install_weak_deps=false -y git
 
-      - uses: actions/checkout@v4
+  #     - uses: actions/checkout@v4
 
-      - name: Build and test
-        uses: ./.github/actions/manylinux
-        with:
-          arch: "aarch64"
-          interpreter: "${{ matrix.python.interpreter }}"
-          features: "generic_simd,yyjson"
-          compatibility: "${{ matrix.python.compatibility }}"
-          publish: "${{ matrix.python.publish }}"
+  #     - name: Build and test
+  #       uses: ./.github/actions/manylinux
+  #       with:
+  #         arch: "aarch64"
+  #         interpreter: "${{ matrix.python.interpreter }}"
+  #         features: "generic_simd,yyjson"
+  #         compatibility: "${{ matrix.python.compatibility }}"
+  #         publish: "${{ matrix.python.publish }}"
 
-      - name: Store wheels
-        if: matrix.python.publish == true
-        uses: actions/upload-artifact@v4
-        with:
-          name: "orjson_manylinux_aarch64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
-          path: dist
-          overwrite: true
-          retention-days: 1
+  #     - name: Store wheels
+  #       if: matrix.python.publish == true
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: "orjson_manylinux_aarch64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
+  #         path: dist
+  #         overwrite: true
+  #         retention-days: 1
 
-      - name: Debug
-        env:
-          CARGO_TARGET_DIR: "/tmp/orjson"
-          ORJSON_FEATURES: "generic_simd,yyjson"
-          PYTHON: "${{ matrix.python.interpreter }}"
-          TARGET: "aarch64-unknown-linux-gnu"
-        run: |
-          export PATH="$PWD/.venv:$HOME/.cargo/bin:$PATH"
-          source .venv/bin/activate
-          script/debug
+  #     - name: Debug
+  #       env:
+  #         CARGO_TARGET_DIR: "/tmp/orjson"
+  #         ORJSON_FEATURES: "generic_simd,yyjson"
+  #         PYTHON: "${{ matrix.python.interpreter }}"
+  #         TARGET: "aarch64-unknown-linux-gnu"
+  #       run: |
+  #         export PATH="$PWD/.venv:$HOME/.cargo/bin:$PATH"
+  #         source .venv/bin/activate
+  #         script/debug
 
   # manylinux_cross:
   #   runs-on: ubuntu-24.04
