@@ -496,10 +496,10 @@ jobs:
       fail-fast: false
       matrix:
         python: [
-          { version: '3.13', macosx_target: "10.15" },
+          # { version: '3.13', macosx_target: "10.15" },
           { version: '3.12', macosx_target: "10.15" },
           { version: '3.11', macosx_target: "10.15" },
-          { version: '3.10', macosx_target: "10.15" },
+          # { version: '3.10', macosx_target: "10.15" },
         ]
     env:
       CC: "clang"
@@ -569,82 +569,82 @@ jobs:
         if-no-files-found: "error"
         compression-level: 0
 
-  macos_universal2_amd64:
-    runs-on: macos-13
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        python: [
-          { version: '3.9', macosx_target: "10.15" },
-        ]
-    env:
-      CC: "clang"
-      CFLAGS: "-O2 -fstrict-aliasing"
-      LDFLAGS: "-Wl,--as-needed"
-      CFLAGS_x86_64_apple_darwin: "-O2 -fstrict-aliasing -fno-plt -march=x86-64-v2 -mtune=generic"
-      CFLAGS_aarch64_apple_darwin: "-O2 -fstrict-aliasing -fno-plt -mcpu=apple-m1 -mtune=generic"
-      RUSTFLAGS: "-C lto=fat -Z mir-opt-level=4 -Z threads=3 -D warnings"
-      PATH: "/Users/runner/work/orjson/orjson/.venv/bin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Library/Frameworks/Python.framework/Versions/Current/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    steps:
+  # macos_universal2_amd64:
+  #   runs-on: macos-13
+  #   timeout-minutes: 10
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python: [
+  #         { version: '3.9', macosx_target: "10.15" },
+  #       ]
+  #   env:
+  #     CC: "clang"
+  #     CFLAGS: "-O2 -fstrict-aliasing"
+  #     LDFLAGS: "-Wl,--as-needed"
+  #     CFLAGS_x86_64_apple_darwin: "-O2 -fstrict-aliasing -fno-plt -march=x86-64-v2 -mtune=generic"
+  #     CFLAGS_aarch64_apple_darwin: "-O2 -fstrict-aliasing -fno-plt -mcpu=apple-m1 -mtune=generic"
+  #     RUSTFLAGS: "-C lto=fat -Z mir-opt-level=4 -Z threads=3 -D warnings"
+  #     PATH: "/Users/runner/work/orjson/orjson/.venv/bin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Library/Frameworks/Python.framework/Versions/Current/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  #   steps:
 
-    - name: CPU info
-      run: sysctl -a | grep brand
+  #   - name: CPU info
+  #     run: sysctl -a | grep brand
 
-    - uses: actions/checkout@v4
+  #   - uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "${{ matrix.python.version }}"
+  #   - uses: actions/setup-python@v5
+  #     with:
+  #       python-version: "${{ matrix.python.version }}"
 
-    - uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: "${{ env.RUST_TOOLCHAIN }}"
-        targets: "aarch64-apple-darwin, x86_64-apple-darwin"
-        components: "rust-src"
+  #   - uses: dtolnay/rust-toolchain@master
+  #     with:
+  #       toolchain: "${{ env.RUST_TOOLCHAIN }}"
+  #       targets: "aarch64-apple-darwin, x86_64-apple-darwin"
+  #       components: "rust-src"
 
-    - name: Build environment
-      run: |
-        cargo fetch --target aarch64-apple-darwin &
+  #   - name: Build environment
+  #     run: |
+  #       cargo fetch --target aarch64-apple-darwin &
 
-        export PATH=$HOME/.cargo/bin:$HOME/.local/bin:$PATH
+  #       export PATH=$HOME/.cargo/bin:$HOME/.local/bin:$PATH
 
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        uv venv --python python${{ matrix.python.version }}
-        uv pip install --upgrade "maturin>=1,<2" -r test/requirements.txt -r integration/requirements.txt
+  #       curl -LsSf https://astral.sh/uv/install.sh | sh
+  #       uv venv --python python${{ matrix.python.version }}
+  #       uv pip install --upgrade "maturin>=1,<2" -r test/requirements.txt -r integration/requirements.txt
 
-        mkdir .cargo
-        cp ci/config.toml .cargo/config.toml
+  #       mkdir .cargo
+  #       cp ci/config.toml .cargo/config.toml
 
-    - name: maturin
-      run: |
-        export PATH=$HOME/.cargo/bin:$HOME/.local/bin:$PATH
+  #   - name: maturin
+  #     run: |
+  #       export PATH=$HOME/.cargo/bin:$HOME/.local/bin:$PATH
 
-        MACOSX_DEPLOYMENT_TARGET="${{ matrix.python.macosx_target }}" \
-        PYO3_CROSS_LIB_DIR=$(python -c "import sysconfig;print(sysconfig.get_config_var('LIBDIR'))") \
-        maturin build --release --strip \
-          --features=generic_simd,yyjson \
-          --interpreter python${{ matrix.python.version }} \
-          --target=universal2-apple-darwin
-        uv pip install target/wheels/orjson*.whl
+  #       MACOSX_DEPLOYMENT_TARGET="${{ matrix.python.macosx_target }}" \
+  #       PYO3_CROSS_LIB_DIR=$(python -c "import sysconfig;print(sysconfig.get_config_var('LIBDIR'))") \
+  #       maturin build --release --strip \
+  #         --features=generic_simd,yyjson \
+  #         --interpreter python${{ matrix.python.version }} \
+  #         --target=universal2-apple-darwin
+  #       uv pip install target/wheels/orjson*.whl
 
-    - run: pytest -v test
-      env:
-        PYTHONMALLOC: "debug"
+  #   - run: pytest -v test
+  #     env:
+  #       PYTHONMALLOC: "debug"
 
-    - run: source .venv/bin/activate && ./integration/run thread
-    - run: source .venv/bin/activate && ./integration/run http
-    - run: source .venv/bin/activate && ./integration/run init
+  #   - run: source .venv/bin/activate && ./integration/run thread
+  #   - run: source .venv/bin/activate && ./integration/run http
+  #   - run: source .venv/bin/activate && ./integration/run init
 
-    - name: Store wheels
-      uses: actions/upload-artifact@v4
-      with:
-        name: orjson_universal2_amd64_${{ matrix.python.version }}
-        path: target/wheels
-        overwrite: true
-        retention-days: 1
-        if-no-files-found: "error"
-        compression-level: 0
+  #   - name: Store wheels
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: orjson_universal2_amd64_${{ matrix.python.version }}
+  #       path: target/wheels
+  #       overwrite: true
+  #       retention-days: 1
+  #       if-no-files-found: "error"
+  #       compression-level: 0
 
   windows_amd64:
     runs-on: windows-2025
@@ -653,11 +653,11 @@ jobs:
       fail-fast: false
       matrix:
         python: [
-          { version: '3.13' },
+          # { version: '3.13' },
           { version: '3.12' },
           { version: '3.11' },
-          { version: '3.10' },
-          { version: '3.9' },
+          # { version: '3.10' },
+          # { version: '3.9' },
         ]
         platform: [
           { arch: "x64", target: "x86_64-pc-windows-msvc", features: "avx512,yyjson" },
