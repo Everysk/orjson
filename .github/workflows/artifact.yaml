@@ -70,202 +70,202 @@ jobs:
         if-no-files-found: "error"
         compression-level: 0
 
-  # manylinux_amd64:
-  #   runs-on: ubuntu-24.04
-  #   container:
-  #     image: fedora:rawhide
-  #   timeout-minutes: 10
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       python: [
-  #         { interpreter: 'python3.13t', compatibility: "manylinux_2_34", publish: false },
-  #         { interpreter: 'python3.13', compatibility: "manylinux_2_17", publish: true },
-  #         { interpreter: 'python3.12', compatibility: "manylinux_2_17", publish: true },
-  #         { interpreter: 'python3.11', compatibility: "manylinux_2_17", publish: true },
-  #         { interpreter: 'python3.10', compatibility: "manylinux_2_17", publish: true },
-  #         { interpreter: 'python3.9', compatibility: "manylinux_2_17", publish: true },
-  #       ]
-  #   env:
-  #     CARGO_TARGET_DIR: "/tmp/orjson"
-  #     CC: "clang"
-  #     CFLAGS: "-O2 -fstrict-aliasing -fno-plt -emit-llvm"
-  #     LDFLAGS: "-fuse-ld=lld -Wl,-plugin-opt=also-emit-llvm -Wl,--as-needed -Wl,-zrelro,-znow"
-  #     RUSTFLAGS: "-C linker=clang -C link-arg=-fuse-ld=lld -C linker-plugin-lto -C lto=fat -C link-arg=-Wl,-zrelro,-znow -Z mir-opt-level=4 -Z threads=4 -D warnings"
-  #     VENV: ".venv"
-  #   steps:
-
-  #     - name: CPU info
-  #       run: cat /proc/cpuinfo
-
-  #     - run: dnf install --setopt=install_weak_deps=false -y git
-
-  #     - uses: actions/checkout@v4
-
-  #     - name: Build and test
-  #       uses: ./.github/actions/manylinux
-  #       with:
-  #         arch: "x86_64"
-  #         interpreter: "${{ matrix.python.interpreter }}"
-  #         features: "avx512,yyjson"
-  #         compatibility: "${{ matrix.python.compatibility }}"
-  #         publish: "${{ matrix.python.publish }}"
-
-  #     - name: Store wheels
-  #       if: matrix.python.publish == true
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: "orjson_manylinux_amd64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
-  #         path: dist
-  #         overwrite: true
-  #         retention-days: 1
-
-  #     - name: Debug
-  #       env:
-  #         CARGO_TARGET_DIR: "/tmp/orjson"
-  #         ORJSON_FEATURES: "avx512,yyjson"
-  #         PYTHON: "${{ matrix.python.interpreter }}"
-  #         TARGET: "x86_64-unknown-linux-gnu"
-  #       run: |
-  #         export PATH="$PWD/.venv:$HOME/.cargo/bin:$PATH"
-  #         source .venv/bin/activate
-  #         script/debug
-
-  # manylinux_aarch64:
-  #   runs-on: ubuntu-24.04-arm
-  #   container:
-  #     image: fedora:rawhide
-  #   timeout-minutes: 10
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       python: [
-  #         { interpreter: 'python3.13t', compatibility: "manylinux_2_34", publish: false },
-  #         { interpreter: 'python3.13', compatibility: "manylinux_2_17", publish: true },
-  #         { interpreter: 'python3.12', compatibility: "manylinux_2_17", publish: true },
-  #         { interpreter: 'python3.11', compatibility: "manylinux_2_17", publish: true },
-  #         { interpreter: 'python3.10', compatibility: "manylinux_2_17", publish: true },
-  #         { interpreter: 'python3.9', compatibility: "manylinux_2_17", publish: true },
-  #       ]
-  #   env:
-  #     CARGO_TARGET_DIR: "/tmp/orjson"
-  #     CC: "clang"
-  #     CFLAGS: "-O2 -fstrict-aliasing -fno-plt -emit-llvm"
-  #     LDFLAGS: "-fuse-ld=lld -Wl,-plugin-opt=also-emit-llvm -Wl,--as-needed -Wl,-zrelro,-znow"
-  #     RUSTFLAGS: "-C linker=clang -C link-arg=-fuse-ld=lld -C linker-plugin-lto -C lto=fat -C link-arg=-Wl,-zrelro,-znow -Z mir-opt-level=4 -Z threads=4 -D warnings"
-  #     VENV: ".venv"
-  #   steps:
-
-  #     - name: CPU info
-  #       run: cat /proc/cpuinfo
-
-  #     - run: dnf install --setopt=install_weak_deps=false -y git
-
-  #     - uses: actions/checkout@v4
-
-  #     - name: Build and test
-  #       uses: ./.github/actions/manylinux
-  #       with:
-  #         arch: "aarch64"
-  #         interpreter: "${{ matrix.python.interpreter }}"
-  #         features: "generic_simd,yyjson"
-  #         compatibility: "${{ matrix.python.compatibility }}"
-  #         publish: "${{ matrix.python.publish }}"
-
-  #     - name: Store wheels
-  #       if: matrix.python.publish == true
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: "orjson_manylinux_aarch64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
-  #         path: dist
-  #         overwrite: true
-  #         retention-days: 1
-
-  #     - name: Debug
-  #       env:
-  #         CARGO_TARGET_DIR: "/tmp/orjson"
-  #         ORJSON_FEATURES: "generic_simd,yyjson"
-  #         PYTHON: "${{ matrix.python.interpreter }}"
-  #         TARGET: "aarch64-unknown-linux-gnu"
-  #       run: |
-  #         export PATH="$PWD/.venv:$HOME/.cargo/bin:$PATH"
-  #         source .venv/bin/activate
-  #         script/debug
-
-  manylinux_cross:
+  manylinux_amd64:
     runs-on: ubuntu-24.04
+    container:
+      image: fedora:rawhide
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
         python: [
-          # { interpreter: 'python3.13', abi: 'cp313-cp313' },
-          { interpreter: 'python3.12', abi: 'cp312-cp312' },
-          { interpreter: 'python3.11', abi: 'cp311-cp311' },
-          # { interpreter: 'python3.10', abi: 'cp310-cp310' },
-          # { interpreter: 'python3.9', abi: 'cp39-cp39' },
+          { interpreter: 'python3.13t', compatibility: "manylinux_2_34", publish: false },
+          { interpreter: 'python3.13', compatibility: "manylinux_2_17", publish: true },
+          { interpreter: 'python3.12', compatibility: "manylinux_2_17", publish: true },
+          { interpreter: 'python3.11', compatibility: "manylinux_2_17", publish: true },
+          { interpreter: 'python3.10', compatibility: "manylinux_2_17", publish: true },
+          { interpreter: 'python3.9', compatibility: "manylinux_2_17", publish: true },
         ]
-        target: [
-          {
-            arch: 'i686',
-            cflags: '-Os -fstrict-aliasing',
-            features: 'yyjson',
-            rustflags: '-Z mir-opt-level=4 -C lto=fat -D warnings',
-            target: 'i686-unknown-linux-gnu',
-          },
-          {
-            arch: 'armv7',
-            cflags: '-Os -fstrict-aliasing',
-            features: 'yyjson',
-            rustflags: '-Z mir-opt-level=4 -C lto=fat -D warnings -C opt-level=s',
-            target: 'armv7-unknown-linux-gnueabihf',
-          },
-          {
-            arch: 'ppc64le',
-            cflags: '-Os -fstrict-aliasing',
-            features: 'generic_simd,yyjson',
-            rustflags: '-Z mir-opt-level=4 -C lto=fat -D warnings',
-            target: 'powerpc64le-unknown-linux-gnu',
-          },
-          {
-            arch: 's390x',
-            cflags: '-Os -fstrict-aliasing -march=z10',
-            features: 'yyjson',
-            rustflags: '-Z mir-opt-level=4 -C lto=fat -D warnings -C target-cpu=z10',
-            target: 's390x-unknown-linux-gnu',
-          },
-        ]
+    env:
+      CARGO_TARGET_DIR: "/tmp/orjson"
+      CC: "clang"
+      CFLAGS: "-O2 -fstrict-aliasing -fno-plt -emit-llvm"
+      LDFLAGS: "-fuse-ld=lld -Wl,-plugin-opt=also-emit-llvm -Wl,--as-needed -Wl,-zrelro,-znow"
+      RUSTFLAGS: "-C linker=clang -C link-arg=-fuse-ld=lld -C linker-plugin-lto -C lto=fat -C link-arg=-Wl,-zrelro,-znow -Z mir-opt-level=4 -Z threads=4 -D warnings"
+      VENV: ".venv"
     steps:
-    - uses: actions/checkout@v4
 
-    - name: build-std
-      run: |
-        mkdir .cargo
-        cp ci/config.toml .cargo/config.toml
+      - name: CPU info
+        run: cat /proc/cpuinfo
 
-    - name: Build
-      uses: PyO3/maturin-action@v1
-      env:
-        PYO3_CROSS_LIB_DIR: "/opt/python/${{ matrix.python.abi }}"
-        CFLAGS: "${{ matrix.target.cflags }}"
-        LDFLAGS: "-Wl,--as-needed"
-        RUSTFLAGS: "${{ matrix.target.rustflags }}"
-      with:
-        target: "${{ matrix.target.target }}"
-        rust-toolchain: "${{ env.RUST_TOOLCHAIN }}"
-        rustup-components: rust-src
-        manylinux: manylinux_2_17
-        args: --release --strip --out=dist --features=${{ matrix.target.features }} -i ${{ matrix.python.interpreter }}
+      - run: dnf install --setopt=install_weak_deps=false -y git
 
-    - name: Store wheels
-      uses: actions/upload-artifact@v4
-      with:
-        name: "orjson_manylinux_${{ matrix.target.arch }}_${{ matrix.python.interpreter }}"
-        path: dist
-        overwrite: true
-        retention-days: 1
-        if-no-files-found: "error"
-        compression-level: 0
+      - uses: actions/checkout@v4
+
+      - name: Build and test
+        uses: ./.github/actions/manylinux
+        with:
+          arch: "x86_64"
+          interpreter: "${{ matrix.python.interpreter }}"
+          features: "avx512,yyjson"
+          compatibility: "${{ matrix.python.compatibility }}"
+          publish: "${{ matrix.python.publish }}"
+
+      - name: Store wheels
+        if: matrix.python.publish == true
+        uses: actions/upload-artifact@v4
+        with:
+          name: "orjson_manylinux_amd64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
+          path: dist
+          overwrite: true
+          retention-days: 1
+
+      - name: Debug
+        env:
+          CARGO_TARGET_DIR: "/tmp/orjson"
+          ORJSON_FEATURES: "avx512,yyjson"
+          PYTHON: "${{ matrix.python.interpreter }}"
+          TARGET: "x86_64-unknown-linux-gnu"
+        run: |
+          export PATH="$PWD/.venv:$HOME/.cargo/bin:$PATH"
+          source .venv/bin/activate
+          script/debug
+
+  manylinux_aarch64:
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: fedora:rawhide
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: [
+          { interpreter: 'python3.13t', compatibility: "manylinux_2_34", publish: false },
+          { interpreter: 'python3.13', compatibility: "manylinux_2_17", publish: true },
+          { interpreter: 'python3.12', compatibility: "manylinux_2_17", publish: true },
+          { interpreter: 'python3.11', compatibility: "manylinux_2_17", publish: true },
+          { interpreter: 'python3.10', compatibility: "manylinux_2_17", publish: true },
+          { interpreter: 'python3.9', compatibility: "manylinux_2_17", publish: true },
+        ]
+    env:
+      CARGO_TARGET_DIR: "/tmp/orjson"
+      CC: "clang"
+      CFLAGS: "-O2 -fstrict-aliasing -fno-plt -emit-llvm"
+      LDFLAGS: "-fuse-ld=lld -Wl,-plugin-opt=also-emit-llvm -Wl,--as-needed -Wl,-zrelro,-znow"
+      RUSTFLAGS: "-C linker=clang -C link-arg=-fuse-ld=lld -C linker-plugin-lto -C lto=fat -C link-arg=-Wl,-zrelro,-znow -Z mir-opt-level=4 -Z threads=4 -D warnings"
+      VENV: ".venv"
+    steps:
+
+      - name: CPU info
+        run: cat /proc/cpuinfo
+
+      - run: dnf install --setopt=install_weak_deps=false -y git
+
+      - uses: actions/checkout@v4
+
+      - name: Build and test
+        uses: ./.github/actions/manylinux
+        with:
+          arch: "aarch64"
+          interpreter: "${{ matrix.python.interpreter }}"
+          features: "generic_simd,yyjson"
+          compatibility: "${{ matrix.python.compatibility }}"
+          publish: "${{ matrix.python.publish }}"
+
+      - name: Store wheels
+        if: matrix.python.publish == true
+        uses: actions/upload-artifact@v4
+        with:
+          name: "orjson_manylinux_aarch64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
+          path: dist
+          overwrite: true
+          retention-days: 1
+
+      - name: Debug
+        env:
+          CARGO_TARGET_DIR: "/tmp/orjson"
+          ORJSON_FEATURES: "generic_simd,yyjson"
+          PYTHON: "${{ matrix.python.interpreter }}"
+          TARGET: "aarch64-unknown-linux-gnu"
+        run: |
+          export PATH="$PWD/.venv:$HOME/.cargo/bin:$PATH"
+          source .venv/bin/activate
+          script/debug
+
+  # manylinux_cross:
+  #   runs-on: ubuntu-24.04
+  #   timeout-minutes: 10
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python: [
+  #         # { interpreter: 'python3.13', abi: 'cp313-cp313' },
+  #         { interpreter: 'python3.12', abi: 'cp312-cp312' },
+  #         { interpreter: 'python3.11', abi: 'cp311-cp311' },
+  #         # { interpreter: 'python3.10', abi: 'cp310-cp310' },
+  #         # { interpreter: 'python3.9', abi: 'cp39-cp39' },
+  #       ]
+  #       target: [
+  #         {
+  #           arch: 'i686',
+  #           cflags: '-Os -fstrict-aliasing',
+  #           features: 'yyjson',
+  #           rustflags: '-Z mir-opt-level=4 -C lto=fat -D warnings',
+  #           target: 'i686-unknown-linux-gnu',
+  #         },
+  #         {
+  #           arch: 'armv7',
+  #           cflags: '-Os -fstrict-aliasing',
+  #           features: 'yyjson',
+  #           rustflags: '-Z mir-opt-level=4 -C lto=fat -D warnings -C opt-level=s',
+  #           target: 'armv7-unknown-linux-gnueabihf',
+  #         },
+  #         {
+  #           arch: 'ppc64le',
+  #           cflags: '-Os -fstrict-aliasing',
+  #           features: 'generic_simd,yyjson',
+  #           rustflags: '-Z mir-opt-level=4 -C lto=fat -D warnings',
+  #           target: 'powerpc64le-unknown-linux-gnu',
+  #         },
+  #         {
+  #           arch: 's390x',
+  #           cflags: '-Os -fstrict-aliasing -march=z10',
+  #           features: 'yyjson',
+  #           rustflags: '-Z mir-opt-level=4 -C lto=fat -D warnings -C target-cpu=z10',
+  #           target: 's390x-unknown-linux-gnu',
+  #         },
+  #       ]
+  #   steps:
+  #   - uses: actions/checkout@v4
+
+  #   - name: build-std
+  #     run: |
+  #       mkdir .cargo
+  #       cp ci/config.toml .cargo/config.toml
+
+  #   - name: Build
+  #     uses: PyO3/maturin-action@v1
+  #     env:
+  #       PYO3_CROSS_LIB_DIR: "/opt/python/${{ matrix.python.abi }}"
+  #       CFLAGS: "${{ matrix.target.cflags }}"
+  #       LDFLAGS: "-Wl,--as-needed"
+  #       RUSTFLAGS: "${{ matrix.target.rustflags }}"
+  #     with:
+  #       target: "${{ matrix.target.target }}"
+  #       rust-toolchain: "${{ env.RUST_TOOLCHAIN }}"
+  #       rustup-components: rust-src
+  #       manylinux: manylinux_2_17
+  #       args: --release --strip --out=dist --features=${{ matrix.target.features }} -i ${{ matrix.python.interpreter }}
+
+  #   - name: Store wheels
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: "orjson_manylinux_${{ matrix.target.arch }}_${{ matrix.python.interpreter }}"
+  #       path: dist
+  #       overwrite: true
+  #       retention-days: 1
+  #       if-no-files-found: "error"
+  #       compression-level: 0
 
   # musllinux_amd64:
   #   runs-on: ubuntu-24.04

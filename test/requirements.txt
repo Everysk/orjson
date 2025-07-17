@@ -5,3 +5,4 @@ psutil;(sys_platform=="linux" or sys_platform == "macos") and platform_machine==
 pytest
 python-dateutil >=2,<3;python_version<"3.14"
 pytz
+numpy==1.25.2
