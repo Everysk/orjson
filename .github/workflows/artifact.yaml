@@ -782,50 +782,50 @@ jobs:
         if-no-files-found: "error"
         compression-level: 0
 
-  pypi:
-    name: PyPI
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    needs: [
-      macos_aarch64,
-      macos_universal2_aarch64,
-      macos_universal2_amd64,
-      manylinux_aarch64,
-      manylinux_amd64,
-      manylinux_cross,
-      musllinux_aarch64,
-      musllinux_amd64,
-      sdist,
-      windows_aarch64,
-      windows_amd64,
-    ]
-    environment:
-      name: PyPI
-      url: https://pypi.org/p/orjson
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
+  # pypi:
+  #   name: PyPI
+  #   runs-on: ubuntu-24.04
+  #   timeout-minutes: 10
+  #   needs: [
+  #     macos_aarch64,
+  #     macos_universal2_aarch64,
+  #     macos_universal2_amd64,
+  #     manylinux_aarch64,
+  #     manylinux_amd64,
+  #     manylinux_cross,
+  #     musllinux_aarch64,
+  #     musllinux_amd64,
+  #     sdist,
+  #     windows_aarch64,
+  #     windows_amd64,
+  #   ]
+  #   environment:
+  #     name: PyPI
+  #     url: https://pypi.org/p/orjson
+  #   permissions:
+  #     id-token: write
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v4
-        with:
-          merge-multiple: true
-          path: dist/
-          pattern: orjson_*
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         merge-multiple: true
+  #         path: dist/
+  #         pattern: orjson_*
 
-      - run: ls -1 dist/
+  #     - run: ls -1 dist/
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.13"
 
-      - run: ./script/check-pypi dist
+  #     - run: ./script/check-pypi dist
 
-      - name: Publish distribution to PyPI
-        if: "startsWith(github.ref, 'refs/tags/')"
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          attestations: true
-          packages-dir: dist
-          skip-existing: true
-          verbose: true
+  #     - name: Publish distribution to PyPI
+  #       if: "startsWith(github.ref, 'refs/tags/')"
+  #       uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         attestations: true
+  #         packages-dir: dist
+  #         skip-existing: true
+  #         verbose: true
