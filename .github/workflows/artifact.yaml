@@ -70,127 +70,127 @@ jobs:
         if-no-files-found: "error"
         compression-level: 0
 
-  manylinux_amd64:
-    runs-on: ubuntu-24.04
-    container:
-      image: fedora:rawhide
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        python: [
-          { interpreter: 'python3.13t', compatibility: "manylinux_2_34", publish: false },
-          { interpreter: 'python3.13', compatibility: "manylinux_2_17", publish: true },
-          { interpreter: 'python3.12', compatibility: "manylinux_2_17", publish: true },
-          { interpreter: 'python3.11', compatibility: "manylinux_2_17", publish: true },
-          { interpreter: 'python3.10', compatibility: "manylinux_2_17", publish: true },
-          { interpreter: 'python3.9', compatibility: "manylinux_2_17", publish: true },
-        ]
-    env:
-      CARGO_TARGET_DIR: "/tmp/orjson"
-      CC: "clang"
-      CFLAGS: "-O2 -fstrict-aliasing -fno-plt -emit-llvm"
-      LDFLAGS: "-fuse-ld=lld -Wl,-plugin-opt=also-emit-llvm -Wl,--as-needed -Wl,-zrelro,-znow"
-      RUSTFLAGS: "-C linker=clang -C link-arg=-fuse-ld=lld -C linker-plugin-lto -C lto=fat -C link-arg=-Wl,-zrelro,-znow -Z mir-opt-level=4 -Z threads=4 -D warnings"
-      VENV: ".venv"
-    steps:
+  # manylinux_amd64:
+  #   runs-on: ubuntu-24.04
+  #   container:
+  #     image: fedora:rawhide
+  #   timeout-minutes: 10
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python: [
+  #         { interpreter: 'python3.13t', compatibility: "manylinux_2_34", publish: false },
+  #         { interpreter: 'python3.13', compatibility: "manylinux_2_17", publish: true },
+  #         { interpreter: 'python3.12', compatibility: "manylinux_2_17", publish: true },
+  #         { interpreter: 'python3.11', compatibility: "manylinux_2_17", publish: true },
+  #         { interpreter: 'python3.10', compatibility: "manylinux_2_17", publish: true },
+  #         { interpreter: 'python3.9', compatibility: "manylinux_2_17", publish: true },
+  #       ]
+  #   env:
+  #     CARGO_TARGET_DIR: "/tmp/orjson"
+  #     CC: "clang"
+  #     CFLAGS: "-O2 -fstrict-aliasing -fno-plt -emit-llvm"
+  #     LDFLAGS: "-fuse-ld=lld -Wl,-plugin-opt=also-emit-llvm -Wl,--as-needed -Wl,-zrelro,-znow"
+  #     RUSTFLAGS: "-C linker=clang -C link-arg=-fuse-ld=lld -C linker-plugin-lto -C lto=fat -C link-arg=-Wl,-zrelro,-znow -Z mir-opt-level=4 -Z threads=4 -D warnings"
+  #     VENV: ".venv"
+  #   steps:
 
-      - name: CPU info
-        run: cat /proc/cpuinfo
+  #     - name: CPU info
+  #       run: cat /proc/cpuinfo
 
-      - run: dnf install --setopt=install_weak_deps=false -y git
+  #     - run: dnf install --setopt=install_weak_deps=false -y git
 
-      - uses: actions/checkout@v4
+  #     - uses: actions/checkout@v4
 
-      - name: Build and test
-        uses: ./.github/actions/manylinux
-        with:
-          arch: "x86_64"
-          interpreter: "${{ matrix.python.interpreter }}"
-          features: "avx512,yyjson"
-          compatibility: "${{ matrix.python.compatibility }}"
-          publish: "${{ matrix.python.publish }}"
+  #     - name: Build and test
+  #       uses: ./.github/actions/manylinux
+  #       with:
+  #         arch: "x86_64"
+  #         interpreter: "${{ matrix.python.interpreter }}"
+  #         features: "avx512,yyjson"
+  #         compatibility: "${{ matrix.python.compatibility }}"
+  #         publish: "${{ matrix.python.publish }}"
 
-      - name: Store wheels
-        if: matrix.python.publish == true
-        uses: actions/upload-artifact@v4
-        with:
-          name: "orjson_manylinux_amd64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
-          path: dist
-          overwrite: true
-          retention-days: 1
+  #     - name: Store wheels
+  #       if: matrix.python.publish == true
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: "orjson_manylinux_amd64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
+  #         path: dist
+  #         overwrite: true
+  #         retention-days: 1
 
-      - name: Debug
-        env:
-          CARGO_TARGET_DIR: "/tmp/orjson"
-          ORJSON_FEATURES: "avx512,yyjson"
-          PYTHON: "${{ matrix.python.interpreter }}"
-          TARGET: "x86_64-unknown-linux-gnu"
-        run: |
-          export PATH="$PWD/.venv:$HOME/.cargo/bin:$PATH"
-          source .venv/bin/activate
-          script/debug
+  #     - name: Debug
+  #       env:
+  #         CARGO_TARGET_DIR: "/tmp/orjson"
+  #         ORJSON_FEATURES: "avx512,yyjson"
+  #         PYTHON: "${{ matrix.python.interpreter }}"
+  #         TARGET: "x86_64-unknown-linux-gnu"
+  #       run: |
+  #         export PATH="$PWD/.venv:$HOME/.cargo/bin:$PATH"
+  #         source .venv/bin/activate
+  #         script/debug
 
-  manylinux_aarch64:
-    runs-on: ubuntu-24.04-arm
-    container:
-      image: fedora:rawhide
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        python: [
-          { interpreter: 'python3.13t', compatibility: "manylinux_2_34", publish: false },
-          { interpreter: 'python3.13', compatibility: "manylinux_2_17", publish: true },
-          { interpreter: 'python3.12', compatibility: "manylinux_2_17", publish: true },
-          { interpreter: 'python3.11', compatibility: "manylinux_2_17", publish: true },
-          { interpreter: 'python3.10', compatibility: "manylinux_2_17", publish: true },
-          { interpreter: 'python3.9', compatibility: "manylinux_2_17", publish: true },
-        ]
-    env:
-      CARGO_TARGET_DIR: "/tmp/orjson"
-      CC: "clang"
-      CFLAGS: "-O2 -fstrict-aliasing -fno-plt -emit-llvm"
-      LDFLAGS: "-fuse-ld=lld -Wl,-plugin-opt=also-emit-llvm -Wl,--as-needed -Wl,-zrelro,-znow"
-      RUSTFLAGS: "-C linker=clang -C link-arg=-fuse-ld=lld -C linker-plugin-lto -C lto=fat -C link-arg=-Wl,-zrelro,-znow -Z mir-opt-level=4 -Z threads=4 -D warnings"
-      VENV: ".venv"
-    steps:
+  # manylinux_aarch64:
+  #   runs-on: ubuntu-24.04-arm
+  #   container:
+  #     image: fedora:rawhide
+  #   timeout-minutes: 10
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python: [
+  #         { interpreter: 'python3.13t', compatibility: "manylinux_2_34", publish: false },
+  #         { interpreter: 'python3.13', compatibility: "manylinux_2_17", publish: true },
+  #         { interpreter: 'python3.12', compatibility: "manylinux_2_17", publish: true },
+  #         { interpreter: 'python3.11', compatibility: "manylinux_2_17", publish: true },
+  #         { interpreter: 'python3.10', compatibility: "manylinux_2_17", publish: true },
+  #         { interpreter: 'python3.9', compatibility: "manylinux_2_17", publish: true },
+  #       ]
+  #   env:
+  #     CARGO_TARGET_DIR: "/tmp/orjson"
+  #     CC: "clang"
+  #     CFLAGS: "-O2 -fstrict-aliasing -fno-plt -emit-llvm"
+  #     LDFLAGS: "-fuse-ld=lld -Wl,-plugin-opt=also-emit-llvm -Wl,--as-needed -Wl,-zrelro,-znow"
+  #     RUSTFLAGS: "-C linker=clang -C link-arg=-fuse-ld=lld -C linker-plugin-lto -C lto=fat -C link-arg=-Wl,-zrelro,-znow -Z mir-opt-level=4 -Z threads=4 -D warnings"
+  #     VENV: ".venv"
+  #   steps:
 
-      - name: CPU info
-        run: cat /proc/cpuinfo
+  #     - name: CPU info
+  #       run: cat /proc/cpuinfo
 
-      - run: dnf install --setopt=install_weak_deps=false -y git
+  #     - run: dnf install --setopt=install_weak_deps=false -y git
 
-      - uses: actions/checkout@v4
+  #     - uses: actions/checkout@v4
 
-      - name: Build and test
-        uses: ./.github/actions/manylinux
-        with:
-          arch: "aarch64"
-          interpreter: "${{ matrix.python.interpreter }}"
-          features: "generic_simd,yyjson"
-          compatibility: "${{ matrix.python.compatibility }}"
-          publish: "${{ matrix.python.publish }}"
+  #     - name: Build and test
+  #       uses: ./.github/actions/manylinux
+  #       with:
+  #         arch: "aarch64"
+  #         interpreter: "${{ matrix.python.interpreter }}"
+  #         features: "generic_simd,yyjson"
+  #         compatibility: "${{ matrix.python.compatibility }}"
+  #         publish: "${{ matrix.python.publish }}"
 
-      - name: Store wheels
-        if: matrix.python.publish == true
-        uses: actions/upload-artifact@v4
-        with:
-          name: "orjson_manylinux_aarch64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
-          path: dist
-          overwrite: true
-          retention-days: 1
+  #     - name: Store wheels
+  #       if: matrix.python.publish == true
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: "orjson_manylinux_aarch64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
+  #         path: dist
+  #         overwrite: true
+  #         retention-days: 1
 
-      - name: Debug
-        env:
-          CARGO_TARGET_DIR: "/tmp/orjson"
-          ORJSON_FEATURES: "generic_simd,yyjson"
-          PYTHON: "${{ matrix.python.interpreter }}"
-          TARGET: "aarch64-unknown-linux-gnu"
-        run: |
-          export PATH="$PWD/.venv:$HOME/.cargo/bin:$PATH"
-          source .venv/bin/activate
-          script/debug
+  #     - name: Debug
+  #       env:
+  #         CARGO_TARGET_DIR: "/tmp/orjson"
+  #         ORJSON_FEATURES: "generic_simd,yyjson"
+  #         PYTHON: "${{ matrix.python.interpreter }}"
+  #         TARGET: "aarch64-unknown-linux-gnu"
+  #       run: |
+  #         export PATH="$PWD/.venv:$HOME/.cargo/bin:$PATH"
+  #         source .venv/bin/activate
+  #         script/debug
 
   manylinux_cross:
     runs-on: ubuntu-24.04
@@ -199,11 +199,11 @@ jobs:
       fail-fast: false
       matrix:
         python: [
-          { interpreter: 'python3.13', abi: 'cp313-cp313' },
+          # { interpreter: 'python3.13', abi: 'cp313-cp313' },
           { interpreter: 'python3.12', abi: 'cp312-cp312' },
           { interpreter: 'python3.11', abi: 'cp311-cp311' },
-          { interpreter: 'python3.10', abi: 'cp310-cp310' },
-          { interpreter: 'python3.9', abi: 'cp39-cp39' },
+          # { interpreter: 'python3.10', abi: 'cp310-cp310' },
+          # { interpreter: 'python3.9', abi: 'cp39-cp39' },
         ]
         target: [
           {
@@ -267,150 +267,150 @@ jobs:
         if-no-files-found: "error"
         compression-level: 0
 
-  musllinux_amd64:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        python: [
-          { version: '3.13', pytest: '1' },
-          { version: '3.12', pytest: '1' },
-          { version: '3.11', pytest: '0' },
-          { version: '3.10', pytest: '0' },
-          { version: '3.9', pytest: '0' },
-        ]
-        platform:
-          - target: x86_64-unknown-linux-musl
-            arch: x86_64
-            platform: linux/amd64
-            features: avx512,unwind,yyjson
-          - target: i686-unknown-linux-musl
-            arch: i686
-            platform: linux/386
-            features: unwind,yyjson
-    steps:
-    - uses: actions/checkout@v4
+  # musllinux_amd64:
+  #   runs-on: ubuntu-24.04
+  #   timeout-minutes: 10
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python: [
+  #         { version: '3.13', pytest: '1' },
+  #         { version: '3.12', pytest: '1' },
+  #         { version: '3.11', pytest: '0' },
+  #         { version: '3.10', pytest: '0' },
+  #         { version: '3.9', pytest: '0' },
+  #       ]
+  #       platform:
+  #         - target: x86_64-unknown-linux-musl
+  #           arch: x86_64
+  #           platform: linux/amd64
+  #           features: avx512,unwind,yyjson
+  #         - target: i686-unknown-linux-musl
+  #           arch: i686
+  #           platform: linux/386
+  #           features: unwind,yyjson
+  #   steps:
+  #   - uses: actions/checkout@v4
 
-    - name: build-std
-      run: |
-        mkdir .cargo
-        cp ci/config.toml .cargo/config.toml
+  #   - name: build-std
+  #     run: |
+  #       mkdir .cargo
+  #       cp ci/config.toml .cargo/config.toml
 
-    - name: Build
-      uses: PyO3/maturin-action@v1
-      env:
-        CC: "gcc"
-        CFLAGS: "-O2"
-        LDFLAGS: "-Wl,--as-needed"
-        RUSTFLAGS: "-C lto=fat -Z mir-opt-level=4 -Z threads=2 -D warnings -C target-feature=-crt-static"
-      with:
-        rust-toolchain: "${{ env.RUST_TOOLCHAIN }}"
-        rustup-components: rust-src
-        target: "${{ matrix.platform.target }}"
-        manylinux: musllinux_1_2
-        args: --release --strip --out=dist --features=${{ matrix.platform.features }} -i python${{ matrix.python.version }}
+  #   - name: Build
+  #     uses: PyO3/maturin-action@v1
+  #     env:
+  #       CC: "gcc"
+  #       CFLAGS: "-O2"
+  #       LDFLAGS: "-Wl,--as-needed"
+  #       RUSTFLAGS: "-C lto=fat -Z mir-opt-level=4 -Z threads=2 -D warnings -C target-feature=-crt-static"
+  #     with:
+  #       rust-toolchain: "${{ env.RUST_TOOLCHAIN }}"
+  #       rustup-components: rust-src
+  #       target: "${{ matrix.platform.target }}"
+  #       manylinux: musllinux_1_2
+  #       args: --release --strip --out=dist --features=${{ matrix.platform.features }} -i python${{ matrix.python.version }}
 
-    - name: Test
-      uses: addnab/docker-run-action@v3
-      with:
-        image: "quay.io/pypa/musllinux_1_2_${{ matrix.platform.arch }}:2025.04.19-1"
-        options: -v ${{ github.workspace }}:/io -w /io
-        run: |
-          apk add tzdata
-          sed -i '/^psutil/d' test/requirements.txt # missing 3.11, 3.12 wheels
-          sed -i '/^numpy/d' test/requirements.txt
+  #   - name: Test
+  #     uses: addnab/docker-run-action@v3
+  #     with:
+  #       image: "quay.io/pypa/musllinux_1_2_${{ matrix.platform.arch }}:2025.04.19-1"
+  #       options: -v ${{ github.workspace }}:/io -w /io
+  #       run: |
+  #         apk add tzdata
+  #         sed -i '/^psutil/d' test/requirements.txt # missing 3.11, 3.12 wheels
+  #         sed -i '/^numpy/d' test/requirements.txt
 
-          python${{ matrix.python.version }} -m venv venv
-          venv/bin/pip install -U pip wheel
-          venv/bin/pip install orjson --no-index --find-links dist/ --force-reinstall
+  #         python${{ matrix.python.version }} -m venv venv
+  #         venv/bin/pip install -U pip wheel
+  #         venv/bin/pip install orjson --no-index --find-links dist/ --force-reinstall
 
-          # segfault on starting pytest after January 2025 on 3.11 and older; artifact works fine
-          if [ ${{ matrix.python.pytest }} == '1' ]; then
-            venv/bin/pip install -r test/requirements.txt
-            PYTHONMALLOC="debug" venv/bin/python -m pytest -v test
-          fi
+  #         # segfault on starting pytest after January 2025 on 3.11 and older; artifact works fine
+  #         if [ ${{ matrix.python.pytest }} == '1' ]; then
+  #           venv/bin/pip install -r test/requirements.txt
+  #           PYTHONMALLOC="debug" venv/bin/python -m pytest -v test
+  #         fi
 
-    - name: Store wheels
-      uses: actions/upload-artifact@v4
-      with:
-        name: orjson_musllinux_${{ matrix.platform.arch }}_${{ matrix.python.version }}
-        path: dist
-        overwrite: true
-        retention-days: 1
-        if-no-files-found: "error"
-        compression-level: 0
+  #   - name: Store wheels
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: orjson_musllinux_${{ matrix.platform.arch }}_${{ matrix.python.version }}
+  #       path: dist
+  #       overwrite: true
+  #       retention-days: 1
+  #       if-no-files-found: "error"
+  #       compression-level: 0
 
-  musllinux_aarch64:
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        python: [
-          { version: '3.13' },
-          { version: '3.12' },
-          { version: '3.11' },
-          { version: '3.10' },
-          { version: '3.9' },
-        ]
-        platform:
-          - target: aarch64-unknown-linux-musl
-            arch: aarch64
-            platform: linux/arm64
-            features: generic_simd,unwind,yyjson
-          - target: armv7-unknown-linux-musleabihf
-            arch: armv7l
-            platform: linux/arm/v7
-            features: yyjson
-    steps:
-    - uses: actions/checkout@v4
+  # musllinux_aarch64:
+  #   runs-on: ubuntu-24.04-arm
+  #   timeout-minutes: 10
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python: [
+  #         { version: '3.13' },
+  #         { version: '3.12' },
+  #         { version: '3.11' },
+  #         { version: '3.10' },
+  #         { version: '3.9' },
+  #       ]
+  #       platform:
+  #         - target: aarch64-unknown-linux-musl
+  #           arch: aarch64
+  #           platform: linux/arm64
+  #           features: generic_simd,unwind,yyjson
+  #         - target: armv7-unknown-linux-musleabihf
+  #           arch: armv7l
+  #           platform: linux/arm/v7
+  #           features: yyjson
+  #   steps:
+  #   - uses: actions/checkout@v4
 
-    - name: build-std
-      run: |
-        mkdir .cargo
-        cp ci/config.toml .cargo/config.toml
+  #   - name: build-std
+  #     run: |
+  #       mkdir .cargo
+  #       cp ci/config.toml .cargo/config.toml
 
-    - name: Build
-      uses: PyO3/maturin-action@v1
-      env:
-        CC: "gcc"
-        CFLAGS: "-O2"
-        LDFLAGS: "-Wl,--as-needed"
-        RUSTFLAGS: "-C lto=fat -Z mir-opt-level=4 -Z threads=2 -D warnings -C target-feature=-crt-static"
-      with:
-        rust-toolchain: "${{ env.RUST_TOOLCHAIN }}"
-        rustup-components: rust-src
-        target: "${{ matrix.platform.target }}"
-        manylinux: musllinux_1_2
-        args: --release --strip --out=dist --features=${{ matrix.platform.features }} -i python${{ matrix.python.version }}
+  #   - name: Build
+  #     uses: PyO3/maturin-action@v1
+  #     env:
+  #       CC: "gcc"
+  #       CFLAGS: "-O2"
+  #       LDFLAGS: "-Wl,--as-needed"
+  #       RUSTFLAGS: "-C lto=fat -Z mir-opt-level=4 -Z threads=2 -D warnings -C target-feature=-crt-static"
+  #     with:
+  #       rust-toolchain: "${{ env.RUST_TOOLCHAIN }}"
+  #       rustup-components: rust-src
+  #       target: "${{ matrix.platform.target }}"
+  #       manylinux: musllinux_1_2
+  #       args: --release --strip --out=dist --features=${{ matrix.platform.features }} -i python${{ matrix.python.version }}
 
-    - name: Test
-      uses: addnab/docker-run-action@v3
-      with:
-        image: "quay.io/pypa/musllinux_1_2_${{ matrix.platform.arch }}:2025.04.19-1"
-        options: -v ${{ github.workspace }}:/io -w /io
-        run: |
-          apk add tzdata
-          sed -i '/^psutil/d' test/requirements.txt # missing 3.11, 3.12 wheels
-          sed -i '/^numpy/d' test/requirements.txt
+  #   - name: Test
+  #     uses: addnab/docker-run-action@v3
+  #     with:
+  #       image: "quay.io/pypa/musllinux_1_2_${{ matrix.platform.arch }}:2025.04.19-1"
+  #       options: -v ${{ github.workspace }}:/io -w /io
+  #       run: |
+  #         apk add tzdata
+  #         sed -i '/^psutil/d' test/requirements.txt # missing 3.11, 3.12 wheels
+  #         sed -i '/^numpy/d' test/requirements.txt
 
-          python${{ matrix.python.version }} -m venv venv
-          venv/bin/pip install -U pip wheel
-          venv/bin/pip install -r test/requirements.txt
-          venv/bin/pip install orjson --no-index --find-links dist/ --force-reinstall
-          export PYTHONMALLOC="debug"
-          venv/bin/python -m pytest -v test
+  #         python${{ matrix.python.version }} -m venv venv
+  #         venv/bin/pip install -U pip wheel
+  #         venv/bin/pip install -r test/requirements.txt
+  #         venv/bin/pip install orjson --no-index --find-links dist/ --force-reinstall
+  #         export PYTHONMALLOC="debug"
+  #         venv/bin/python -m pytest -v test
 
-    - name: Store wheels
-      uses: actions/upload-artifact@v4
-      with:
-        name: orjson_musllinux_${{ matrix.platform.arch }}_${{ matrix.python.version }}
-        path: dist
-        overwrite: true
-        retention-days: 1
-        if-no-files-found: "error"
-        compression-level: 0
+  #   - name: Store wheels
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: orjson_musllinux_${{ matrix.platform.arch }}_${{ matrix.python.version }}
+  #       path: dist
+  #       overwrite: true
+  #       retention-days: 1
+  #       if-no-files-found: "error"
+  #       compression-level: 0
 
   macos_aarch64:
     runs-on: macos-15
@@ -419,7 +419,7 @@ jobs:
       fail-fast: false
       matrix:
         python: [
-          { version: '3.13', macosx_target: "15.0" },
+          # { version: '3.13', macosx_target: "15.0" },
           { version: '3.12', macosx_target: "15.0" },
           { version: '3.11', macosx_target: "15.0" },
         ]
