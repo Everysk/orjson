@@ -325,7 +325,7 @@ jobs:
 
           python${{ matrix.python.version }} -m venv venv
           venv/bin/pip install -U pip wheel
-          venv/bin/pip install orjson --no-index --find-links dist/ --force-reinstall
+          venv/bin/pip install everysk-orjson --no-index --find-links dist/ --force-reinstall
 
           # segfault on starting pytest after January 2025 on 3.11 and older; artifact works fine
           if [ ${{ matrix.python.pytest }} == '1' ]; then
@@ -400,7 +400,7 @@ jobs:
           python${{ matrix.python.version }} -m venv venv
           venv/bin/pip install -U pip wheel
           venv/bin/pip install -r test/requirements.txt
-          venv/bin/pip install orjson --no-index --find-links dist/ --force-reinstall
+          venv/bin/pip install everysk-orjson --no-index --find-links dist/ --force-reinstall
           export PYTHONMALLOC="debug"
           venv/bin/python -m pytest -v test
 
@@ -709,7 +709,7 @@ jobs:
     - name: maturin
       run: |
         maturin.exe build --release --strip --features="${{ matrix.platform.features }}" --target="${{ matrix.platform.target }}"
-        python.exe -m pip install orjson --no-index --find-links target\wheels
+        python.exe -m pip install everysk-orjson --no-index --find-links target\wheels
 
     - run: python.exe -m pytest -s -rxX -v test
       env:
@@ -777,7 +777,7 @@ jobs:
     - name: maturin
       run: |
         maturin.exe build --release --strip --features=generic_simd --target="$env:TARGET"
-        python.exe -m pip install orjson --no-index --find-links target\wheels
+        python.exe -m pip install everysk-orjson --no-index --find-links target\wheels
 
     - run: python.exe -m pytest -s -rxX -v test
       env:
