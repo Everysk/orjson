@@ -63,7 +63,7 @@ jobs:
     - name: Store sdist
       uses: actions/upload-artifact@v4
       with:
-        name: orjson_sdist
+        name: everysk_orjson_sdist
         path: dist
         overwrite: true
         retention-days: 1
@@ -116,7 +116,7 @@ jobs:
         if: matrix.python.publish == true
         uses: actions/upload-artifact@v4
         with:
-          name: "orjson_manylinux_amd64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
+          name: "everysk_orjson_manylinux_amd64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
           path: dist
           overwrite: true
           retention-days: 1
@@ -178,7 +178,7 @@ jobs:
         if: matrix.python.publish == true
         uses: actions/upload-artifact@v4
         with:
-          name: "orjson_manylinux_aarch64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
+          name: "everysk_orjson_manylinux_aarch64_${{ matrix.python.interpreter }}_${{ matrix.python.compatibility }}"
           path: dist
           overwrite: true
           retention-days: 1
@@ -262,7 +262,7 @@ jobs:
     - name: Store wheels
       uses: actions/upload-artifact@v4
       with:
-        name: "orjson_manylinux_${{ matrix.target.arch }}_${{ matrix.python.interpreter }}"
+        name: "everysk_orjson_manylinux_${{ matrix.target.arch }}_${{ matrix.python.interpreter }}"
         path: dist
         overwrite: true
         retention-days: 1
@@ -336,7 +336,7 @@ jobs:
     - name: Store wheels
       uses: actions/upload-artifact@v4
       with:
-        name: orjson_musllinux_${{ matrix.platform.arch }}_${{ matrix.python.version }}
+        name: everysk_orjson_musllinux_${{ matrix.platform.arch }}_${{ matrix.python.version }}
         path: dist
         overwrite: true
         retention-days: 1
@@ -407,7 +407,7 @@ jobs:
     - name: Store wheels
       uses: actions/upload-artifact@v4
       with:
-        name: orjson_musllinux_${{ matrix.platform.arch }}_${{ matrix.python.version }}
+        name: everysk_orjson_musllinux_${{ matrix.platform.arch }}_${{ matrix.python.version }}
         path: dist
         overwrite: true
         retention-days: 1
@@ -487,7 +487,7 @@ jobs:
       if: matrix.python.publish == true
       uses: actions/upload-artifact@v4
       with:
-        name: orjson_macos_aarch64_${{ matrix.python.version }}
+        name: everysk_orjson_macos_aarch64_${{ matrix.python.version }}
         path: target/wheels
         overwrite: true
         retention-days: 1
@@ -570,7 +570,7 @@ jobs:
       if: matrix.python.publish == true
       uses: actions/upload-artifact@v4
       with:
-        name: orjson_universal2_aarch64_${{ matrix.python.version }}
+        name: everysk_orjson_universal2_aarch64_${{ matrix.python.version }}
         path: target/wheels
         overwrite: true
         retention-days: 1
@@ -649,7 +649,7 @@ jobs:
     - name: Store wheels
       uses: actions/upload-artifact@v4
       with:
-        name: orjson_universal2_amd64_${{ matrix.python.version }}
+        name: everysk_orjson_universal2_amd64_${{ matrix.python.version }}
         path: target/wheels
         overwrite: true
         retention-days: 1
@@ -719,7 +719,7 @@ jobs:
       if: matrix.python.publish == true
       uses: actions/upload-artifact@v4
       with:
-        name: orjson_windows_amd64_${{ matrix.platform.arch }}_${{ matrix.python.version }}
+        name: everysk_orjson_windows_amd64_${{ matrix.platform.arch }}_${{ matrix.python.version }}
         path: target\wheels
         overwrite: true
         retention-days: 1
@@ -787,7 +787,7 @@ jobs:
       if: matrix.python.publish == true
       uses: actions/upload-artifact@v4
       with:
-        name: orjson_windows_aarch64_${{ matrix.python.version }}
+        name: everysk_orjson_windows_aarch64_${{ matrix.python.version }}
         path: target\wheels
         overwrite: true
         retention-days: 1
@@ -823,7 +823,7 @@ jobs:
         with:
           merge-multiple: true
           path: dist/
-          pattern: orjson_*
+          pattern: everysk_orjson_*
 
       - run: ls -1 dist/
 
