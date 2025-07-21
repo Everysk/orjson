@@ -45,7 +45,7 @@ jobs:
 
     - run: maturin sdist --out=dist
 
-    - run: python3 -m pip install --user dist/orjson*.tar.gz
+    - run: python3 -m pip install --user dist/everysk_orjson*.tar.gz
       env:
         CARGO_NET_OFFLINE: "true"
 
@@ -473,7 +473,7 @@ jobs:
           --features=generic_simd,yyjson \
           --interpreter python${{ matrix.python.version }} \
           --target=aarch64-apple-darwin
-        uv pip install target/wheels/orjson*.whl
+        uv pip install target/wheels/everysk_orjson*.whl
 
     - run: pytest -v test
       env:
@@ -556,7 +556,7 @@ jobs:
           --features=generic_simd,yyjson \
           --interpreter python${{ matrix.python.version }} \
           --target=universal2-apple-darwin
-        uv pip install target/wheels/orjson*.whl
+        uv pip install target/wheels/everysk_orjson*.whl
 
     - run: pytest -v test
       env:
@@ -636,7 +636,7 @@ jobs:
           --features=generic_simd,yyjson \
           --interpreter python${{ matrix.python.version }} \
           --target=universal2-apple-darwin
-        uv pip install target/wheels/orjson*.whl
+        uv pip install target/wheels/everysk_orjson*.whl
 
     - run: pytest -v test
       env:
