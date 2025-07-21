@@ -88,7 +88,7 @@ jobs:
           { interpreter: 'python3.9', compatibility: "manylinux_2_17", publish: true },
         ]
     env:
-      CARGO_TARGET_DIR: "/tmp/orjson"
+      CARGO_TARGET_DIR: "/tmp/everysk_orjson"
       CC: "clang"
       CFLAGS: "-O2 -fstrict-aliasing -fno-plt -emit-llvm"
       LDFLAGS: "-fuse-ld=lld -Wl,-plugin-opt=also-emit-llvm -Wl,--as-needed -Wl,-zrelro,-znow"
