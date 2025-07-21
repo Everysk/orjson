@@ -11,7 +11,7 @@ dist = sys.argv[1]
 pyproject_doc = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
 pyproject_version = pyproject_doc["project"]["version"]
 
-prefix = f"orjson-{pyproject_version}"
+prefix = f"everysk_orjson-{pyproject_version}"
 
 abis = (
     "cp39-cp39",

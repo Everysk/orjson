@@ -45,7 +45,7 @@ runs:
           --interpreter="${PYTHON}" \
           --target="${TARGET}"
 
-        uv pip install ${CARGO_TARGET_DIR}/wheels/orjson*.whl
+        uv pip install ${CARGO_TARGET_DIR}/wheels/everysk_orjson*.whl
 
         export PYTHONMALLOC="debug"
         pytest -v test
@@ -53,4 +53,4 @@ runs:
         ./integration/run http
         ./integration/run init
 
-        cp ${CARGO_TARGET_DIR}/wheels/orjson*.whl dist
+        cp ${CARGO_TARGET_DIR}/wheels/everysk_orjson*.whl dist
