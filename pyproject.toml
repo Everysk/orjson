@@ -1,6 +1,6 @@
 [project]
 name = "everysk-orjson"
-version = "3.11.1"
+version = "3.11.2"
 repository = "https://github.com/Everysk/orjson"
 requires-python = ">=3.9"
 classifiers = [
