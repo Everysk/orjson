@@ -46,17 +46,23 @@ class TestLoadNanAsNoneTests:
         ]
 
         test_cases = [
-            (b'NaN', None),
-            (b'Infinity', None),
-            (b'-Infinity', None),
-            (b'{"nan": NaN, "inf": Infinity, "neginf": -Infinity}', {"nan": None, "inf": None, "neginf": None}),
+            (b"NaN", None),
+            (b"Infinity", None),
+            (b"-Infinity", None),
+            (
+                b'{"nan": NaN, "inf": Infinity, "neginf": -Infinity}',
+                {"nan": None, "inf": None, "neginf": None},
+            ),
             (b'{"a": 1, "b": "test", "c": true}', {"a": 1, "b": "test", "c": True}),
             (b'{"b": 2, "a": 1}', {"b": 2, "a": 1}),
-            (b'123', 123),
-            (b'-123', -123),
-            (b'100000000000000000001', 100000000000000000001),
-            (b'-100000000000000000001', -100000000000000000001),
-            (b'{"big": 123456789012345678901234567890}', {"big": 123456789012345678901234567890}),
+            (b"123", 123),
+            (b"-123", -123),
+            (b"100000000000000000001", 100000000000000000001),
+            (b"-100000000000000000001", -100000000000000000001),
+            (
+                b'{"big": 123456789012345678901234567890}',
+                {"big": 123456789012345678901234567890},
+            ),
         ]
         for option in options:
             print(f"Testing with option: {option}")
