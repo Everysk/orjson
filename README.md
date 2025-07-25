@@ -1,6 +1,6 @@
-# everysk-json
+# everysk-orjson
 
-`everysk-json` is a high-performance JSON library for Python, forked from [`orjson`](https://github.com/ijl/orjson). It provides fast serialization and deserialization, with additional features for handling big integers and special floating-point values.
+`everysk-orjson` is a high-performance JSON library for Python, forked from [`orjson`](https://github.com/ijl/orjson). It provides fast serialization and deserialization, with additional features for handling big integers and special floating-point values.
 
 ## Features
 
@@ -30,12 +30,12 @@
 ## Installation
 
 ```bash
-pip install everysk-json
+pip install everysk-orjson
 ```
 
 ## Usage
 
-`everysk-json` is a drop-in replacement for `orjson`. Simply import and use the additional options as needed.
+`everysk-orjson` is a drop-in replacement for `orjson`. Simply import and use the additional options as needed.
 
 ## License
 
