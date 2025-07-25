@@ -1,8 +1,8 @@
 [package]
 name = "orjson"
 version = "3.11.1"
-authors = ["ijl <ijl@mailbox.org>"]
-description = "Fast, correct Python JSON library supporting dataclasses, datetimes, and numpy"
+authors = ["Everysk Support <support@everysk.com>"]
+description = "Fast, correct Python JSON library supporting dataclasses, datetimes, numpy, big integers and special floating-point values."
 edition = "2021"
 resolver = "2"
 rust-version = "1.82"

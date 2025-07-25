@@ -36,3 +36,30 @@ class TestLoadNanAsNoneTests:
         data = b'[{"a": nan}, [Infinity, {"b": -Infinity}], NaN]'
         result = orjson.loads(data, option=orjson.OPT_NAN_AS_NULL)
         assert result == [{"a": None}, [None, {"b": None}], None]
+
+    def test_nan_inf_as_none_flag_combinations(self):
+        """
+        Test that NaN, Infinity, and -Infinity are loaded as None with OPT_NAN_AS_NULL and other flags.
+        """
+        options = [
+            orjson.OPT_NAN_AS_NULL | orjson.OPT_BIG_INTEGER,
+        ]
+
+        test_cases = [
+            (b'NaN', None),
+            (b'Infinity', None),
+            (b'-Infinity', None),
+            (b'{"nan": NaN, "inf": Infinity, "neginf": -Infinity}', {"nan": None, "inf": None, "neginf": None}),
+            (b'{"a": 1, "b": "test", "c": true}', {"a": 1, "b": "test", "c": True}),
+            (b'{"b": 2, "a": 1}', {"b": 2, "a": 1}),
+            (b'123', 123),
+            (b'-123', -123),
+            (b'100000000000000000001', 100000000000000000001),
+            (b'-100000000000000000001', -100000000000000000001),
+            (b'{"big": 123456789012345678901234567890}', {"big": 123456789012345678901234567890}),
+        ]
+        for option in options:
+            print(f"Testing with option: {option}")
+            for data, expected in test_cases:
+                result = orjson.loads(data, option=option)
+                assert result == expected
