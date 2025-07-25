@@ -193,6 +193,22 @@ fn parse_yy_string(elem: *mut yyjson_val) -> NonNull<pyo3_ffi::PyObject> {
 
 #[inline(always)]
 fn parse_yy_raw(elem: *mut yyjson_val) -> NonNull<pyo3_ffi::PyObject> {
+    let s = unsafe {
+        std::slice::from_raw_parts((*elem).uni.str_.cast::<u8>(), unsafe_yyjson_get_len(elem))
+    };
+    // Only test the first 2 chars to be a valid JSON integer.
+    // Accepts optional leading '-' and at least one digit, no other characters.
+    if s.is_empty() {
+        return parse_none();
+    }
+    let valid = match s {
+        [b'-', d, ..] => d.is_ascii_digit(),
+        [d, ..] => d.is_ascii_digit(),
+        _ => false,
+    };
+    if !valid {
+        return parse_none();
+    }
     parse_big_int(unsafe { (*elem).uni.str_.cast::<std::os::raw::c_char>() })
 }
 
